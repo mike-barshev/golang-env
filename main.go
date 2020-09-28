@@ -1,41 +1,32 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"os"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
-
-type Student struct {
-	port     string
-	secrets int `json:"Standard"`
-	db_credentials
+//Config считывает env переменные из файла .vscode\launch.json
+type Config struct {
+	Port          string
+	Secrets       map[string]string
+	DBCredentials map[string]string
 }
 
 func main() {
-	file, err := os.Open("config.json")
+	var s Config
+	err := envconfig.Process("glebtest", &s)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
-	defer file.Close()
-
-	var studentDecoder *json.Decoder = json.NewDecoder(file)
-	if err != nil {
-		log.Fatal(err)
+	fmt.Printf("Port: %s\n", s.Port)
+	fmt.Println("Secrets:")
+	for k, v := range s.Secrets {
+		fmt.Printf("  %s: %s\n", k, v)
 	}
-
-	var studentList []Student
-
-	err = studentDecoder.Decode(&studentList)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for i, student := range studentList {
-		fmt.Println("Student", i+1)
-		fmt.Println("Student name:", student.Name)
-		fmt.Println("Student standard:", student.Standard)
+	fmt.Println("DBCredentials:")
+	for k, v := range s.DBCredentials {
+		fmt.Printf("  %s: %s\n", k, v)
 	}
 }
